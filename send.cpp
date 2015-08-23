@@ -1,6 +1,8 @@
 /*
  Usage: ./send <systemCode> <unitCode> <command>
- Command is 0 for OFF and 1 for ON
+     <systemCode> not used
+     <unitCode> should be 0, 1, 2, ... etc
+     <command> is 0 for OFF and 1 for ON
  */
 
 #include "RCSwitch.h"
@@ -18,18 +20,22 @@ int main(int argc, char *argv[]) {
     char* systemCode = argv[1];
     int unitCode = atoi(argv[2]);
     int command  = atoi(argv[3]);
+    long baseAddr = 14649346;
     
     if (wiringPiSetup () == -1) return 1;
 	printf("sending systemCode[%s] unitCode[%i] command[%i]\n", systemCode, unitCode, command);
 	RCSwitch mySwitch = RCSwitch();
 	mySwitch.enableTransmit(PIN);
+	mySwitch.setPulseLength(342);
     
     switch(command) {
         case 1:
-            mySwitch.switchOn(systemCode, unitCode);
+            mySwitch.send(baseAddr + unitCode*16 + 8, 24);
+            //mySwitch.switchOn(systemCode, unitCode);
             break;
         case 0:
-            mySwitch.switchOff(systemCode, unitCode);
+            mySwitch.send(baseAddr + unitCode*16, 24);
+            //mySwitch.switchOff(systemCode, unitCode);
             break;
         default:
             printf("command[%i] is unsupported\n", command);
